@@ -8,16 +8,24 @@ name: Build and push Quiz 3 RStudio workspace image
 # org, so the workflow's own built-in GITHUB_TOKEN is enough to publish to
 # ghcr.io/berkeley-stat133/... -- no PAT or repo secrets required.
 #
+# IMPORTANT: the package name (stat133-pl-images-rstudio-quiz3) is unique to
+# this repo on purpose. GHCR packages are owned by whichever specific repo
+# first creates them, not shared automatically across a GitHub org -- an
+# earlier attempt to publish under a name already created by a different
+# repo (fall-2026-private) failed with "permission_denied: write_package"
+# even though both repos are in the same org. Publishing under a fresh name
+# avoids that entirely.
+#
 # If this ever fails with a permissions error, check Settings > Actions >
 # General > Workflow permissions on this repo and make sure "Read and write
 # permissions" is selected (this grants GITHUB_TOKEN packages:write, on top
 # of the `permissions:` block below).
 #
 # After the first successful run, go to
-# github.com/orgs/berkeley-stat133/packages, find pl-stat133-rstudio-quiz3,
-# and set its visibility to Public (the PrairieLearn workspace host must
-# pull it without credentials, and this is independent of this repo's own
-# public visibility).
+# github.com/orgs/berkeley-stat133/packages, find
+# stat133-pl-images-rstudio-quiz3, and set its visibility to Public (the
+# PrairieLearn workspace host must pull it without credentials, and this is
+# independent of this repo's own public visibility).
 #
 # Trigger manually from the Actions tab, or automatically on changes to the
 # image's build context.
@@ -34,7 +42,7 @@ permissions:
   packages: write
 
 env:
-  IMAGE: ghcr.io/berkeley-stat133/pl-stat133-rstudio-quiz3
+  IMAGE: ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3
 
 jobs:
   build-and-push:
@@ -70,16 +78,16 @@ jobs:
       # in bash, not a continuation, so a stray `\` reaches R -- and R 4.1+
       # treats a bare `\` as the start of a `\(x) ...` lambda, leaving the
       # parse incomplete and the process hanging on stdin forever.
-      - name: Smoke test (packages + data(ev) load correctly)
+      - name: Smoke test (packages + data(zev) load correctly)
         run: |
           docker run --rm ${{ env.IMAGE }}:1.0 R -e '
             library(tidyverse)
             library(palmerpenguins)
-            data(ev)
+            data(zev)
             data(penguins)
-            stopifnot(nrow(ev) == 77898, ncol(ev) == 7)
+            stopifnot(nrow(zev) == 77898, ncol(zev) == 7)
             stopifnot(nrow(penguins) > 0)
-            cat("OK: ev is", nrow(ev), "x", ncol(ev), "\n")
-            str(ev)
+            cat("OK: zev is", nrow(zev), "x", ncol(zev), "\n")
+            str(zev)
             str(penguins)
           '

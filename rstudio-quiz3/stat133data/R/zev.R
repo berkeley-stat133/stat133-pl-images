@@ -5,7 +5,7 @@
 #' the \code{"County"} sheet of
 #' \code{New_ZEV_Sales_Last_updated_07-17-2026_ada.xlsx}, loaded here as an R
 #' object so it is available in the PrairieLearn RStudio workspace via
-#' \code{data(ev)} without needing \code{readxl}, a file path, or internet
+#' \code{data(zev)} without needing \code{readxl}, a file path, or internet
 #' access during the quiz.
 #'
 #' Column names are left exactly as in the source spreadsheet, including
@@ -27,4 +27,4 @@
 #' }
 #' @source California Energy Commission, \code{New_ZEV_Sales_Last_updated_07-17-2026_ada.xlsx},
 #'   sheet "County".
-"ev"
+"zev"

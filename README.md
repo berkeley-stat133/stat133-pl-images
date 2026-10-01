@@ -15,8 +15,8 @@ have collaborator but not admin access).
 
 - [`rstudio-quiz3/`](rstudio-quiz3/) -- Quiz 3's custom RStudio workspace image
   (`prairielearn/workspace-rstudio` + tidyverse + palmerpenguins + a small
-  `stat133data` package providing `data(ev)`). Published to
-  `ghcr.io/berkeley-stat133/pl-stat133-rstudio-quiz3`.
+  `stat133data` package providing `data(zev)`). Published to
+  `ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3`.
 
 ## Publishing
 

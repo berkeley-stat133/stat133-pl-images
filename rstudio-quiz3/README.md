@@ -7,10 +7,10 @@ Custom PrairieLearn RStudio workspace image for Quiz 3, extending
   (lectures 12, 14, 15, 16).
 - **`palmerpenguins`** -- the `penguins` dataset (lecture 14).
 - **`stat133data`** (local package, source in `stat133data/`) -- bundles the
-  `ev` dataset: the **`County`** sheet of the ZEV project's
+  `zev` dataset: the **`County`** sheet of the ZEV project's
   `New_ZEV_Sales_Last_updated_07-17-2026_ada.xlsx` (77,898 rows: `Data Year`,
   `Quarter`, `COUNTY`, `FUEL_TYPE`, `MAKE`, `MODEL`, `Number of Vehicles`).
-  It loads with a plain `data(ev)` call, matching how `data(sampson)` worked
+  It loads with a plain `data(zev)` call, matching how `data(sampson)` worked
   for the `lda` package on Quiz 2. No `readxl`, `library()` call, or
   file/URL read is required; R's `data()` searches all installed packages
   for a matching dataset name when `package` isn't specified. Column names
@@ -22,7 +22,7 @@ of scope for Quiz 3, so nothing from that lecture was added.
 
 The built image is consumed by `pl-ucb-stat133`'s `questions/r-studio/info.json`
 (`workspaceOptions.image`), which points at
-`ghcr.io/berkeley-stat133/pl-stat133-rstudio-quiz3:1.0`.
+`ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.0`.
 
 ## Build & publish
 
@@ -45,17 +45,17 @@ silently replace what's running mid-quiz.
 ## Verifying
 
 ```sh
-docker run --rm ghcr.io/berkeley-stat133/pl-stat133-rstudio-quiz3:1.0 \
-  R -e 'library(tidyverse); library(palmerpenguins); data(ev); data(penguins); str(ev); str(penguins)'
+docker run --rm ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.0 \
+  R -e 'library(tidyverse); library(palmerpenguins); data(zev); data(penguins); str(zev); str(penguins)'
 ```
 
-`ev` should be a 77,898-row data frame with columns `Data Year`, `Quarter`,
+`zev` should be a 77,898-row data frame with columns `Data Year`, `Quarter`,
 `COUNTY`, `FUEL_TYPE`, `MAKE`, `MODEL`, `Number of Vehicles`.
 
-## Updating the `ev` dataset
+## Updating the `zev` dataset
 
 Source data lives at
 `fall-2026-private/projects/3-electric-vehicles/data/New_ZEV_Sales_Last_updated_07-17-2026_ada.xlsx`
 (sheet `"County"`) in the course content repo. If it changes, regenerate
-`stat133data/data/ev.rda` by re-running `stat133data/data-raw/create-ev.R`,
+`stat133data/data/zev.rda` by re-running `stat133data/data-raw/create-zev.R`,
 then rebuild and re-push the image (bumping the tag as above).
