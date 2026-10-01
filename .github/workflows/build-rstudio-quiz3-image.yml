@@ -1,0 +1,85 @@
+name: Build and push Quiz 3 RStudio workspace image
+
+# Builds rstudio-quiz3/Dockerfile on a GitHub-hosted runner and pushes it to
+# GHCR. Exists so nobody needs a local Docker install (e.g. an OS too old
+# for Docker Desktop) to publish this image.
+#
+# This repo (stat133-pl-images) is public and owned by the berkeley-stat133
+# org, so the workflow's own built-in GITHUB_TOKEN is enough to publish to
+# ghcr.io/berkeley-stat133/... -- no PAT or repo secrets required.
+#
+# If this ever fails with a permissions error, check Settings > Actions >
+# General > Workflow permissions on this repo and make sure "Read and write
+# permissions" is selected (this grants GITHUB_TOKEN packages:write, on top
+# of the `permissions:` block below).
+#
+# After the first successful run, go to
+# github.com/orgs/berkeley-stat133/packages, find pl-stat133-rstudio-quiz3,
+# and set its visibility to Public (the PrairieLearn workspace host must
+# pull it without credentials, and this is independent of this repo's own
+# public visibility).
+#
+# Trigger manually from the Actions tab, or automatically on changes to the
+# image's build context.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "rstudio-quiz3/**"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/berkeley-stat133/pl-stat133-rstudio-quiz3
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    # Guardrail: a malformed step here should fail fast, not silently burn
+    # runner minutes for hours waiting on a hung process.
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: rstudio-quiz3
+          push: true
+          load: true
+          tags: |
+            ${{ env.IMAGE }}:1.0
+            ${{ env.IMAGE }}:latest
+
+      # Runs on the GitHub-hosted runner, not on any contributor's laptop --
+      # useful when nobody on staff has a local Docker install available.
+      #
+      # NOTE: keep this a real multi-line string (no trailing backslashes
+      # inside the quotes). Backslash-newline inside single quotes is literal
+      # in bash, not a continuation, so a stray `\` reaches R -- and R 4.1+
+      # treats a bare `\` as the start of a `\(x) ...` lambda, leaving the
+      # parse incomplete and the process hanging on stdin forever.
+      - name: Smoke test (packages + data(ev) load correctly)
+        run: |
+          docker run --rm ${{ env.IMAGE }}:1.0 R -e '
+            library(tidyverse)
+            library(palmerpenguins)
+            data(ev)
+            data(penguins)
+            stopifnot(nrow(ev) == 77898, ncol(ev) == 7)
+            stopifnot(nrow(penguins) > 0)
+            cat("OK: ev is", nrow(ev), "x", ncol(ev), "\n")
+            str(ev)
+            str(penguins)
+          '

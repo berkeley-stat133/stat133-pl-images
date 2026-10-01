@@ -1,0 +1,12 @@
+Package: stat133data
+Title: Course Datasets for STAT 133 PrairieLearn Workspaces
+Version: 1.0.0
+Authors@R: person("STAT 133", "Staff", role = c("aut", "cre"), email = "stat133@berkeley.edu")
+Description: Bundles small course datasets (e.g. 'ev', state-level EV registration
+    counts) so they can be loaded in PrairieLearn RStudio workspaces with a plain
+    data(ev) call, without requiring students to read a CSV or have internet
+    access during a quiz.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
