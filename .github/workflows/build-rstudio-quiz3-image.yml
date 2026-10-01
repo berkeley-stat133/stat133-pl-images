@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     # Guardrail: a malformed step here should fail fast, not silently burn
     # runner minutes for hours waiting on a hung process.
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -73,14 +73,21 @@ jobs:
       # Runs on the GitHub-hosted runner, not on any contributor's laptop --
       # useful when nobody on staff has a local Docker install available.
       #
-      # NOTE: keep this a real multi-line string (no trailing backslashes
+      # NOTE 1: keep this a real multi-line string (no trailing backslashes
       # inside the quotes). Backslash-newline inside single quotes is literal
       # in bash, not a continuation, so a stray `\` reaches R -- and R 4.1+
       # treats a bare `\` as the start of a `\(x) ...` lambda, leaving the
       # parse incomplete and the process hanging on stdin forever.
+      #
+      # NOTE 2: `--entrypoint R` is required. prairielearn/workspace-rstudio's
+      # own ENTRYPOINT launches the RStudio Server process (a long-running
+      # service), so `docker run image R -e '...'` without overriding it
+      # starts the server instead of running a one-shot command -- the
+      # container never exits, and `docker run` hangs until the job times
+      # out. Overriding the entrypoint bypasses the server launcher entirely.
       - name: Smoke test (packages + data(zev) load correctly)
         run: |
-          docker run --rm ${{ env.IMAGE }}:1.0 R -e '
+          docker run --rm --entrypoint R ${{ env.IMAGE }}:1.0 -e '
             library(tidyverse)
             library(palmerpenguins)
             data(zev)
