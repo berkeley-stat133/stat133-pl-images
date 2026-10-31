@@ -85,17 +85,13 @@ jobs:
       # starts the server instead of running a one-shot command -- the
       # container never exits, and `docker run` hangs until the job times
       # out. Overriding the entrypoint bypasses the server launcher entirely.
-      - name: Smoke test (packages + data(zev) + offline sf load correctly)
+      - name: Smoke test (packages and offline sf load correctly)
         run: |
           docker run --rm --network none --entrypoint R ${{ env.IMAGE }}:1.1 -e '
             library(tidyverse)
             library(palmerpenguins)
-            data(zev)
             data(penguins)
-            stopifnot(nrow(zev) == 77898, ncol(zev) == 7)
             stopifnot(nrow(penguins) > 0)
-            cat("OK: zev is", nrow(zev), "x", ncol(zev), "\n")
-            str(zev)
             str(penguins)
             library(sf)
             library(lwgeom)

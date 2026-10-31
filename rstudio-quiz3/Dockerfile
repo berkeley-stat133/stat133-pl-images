@@ -1,10 +1,7 @@
 # Custom PrairieLearn RStudio workspace image for the Stat 133 quizzes (first
 # built for Quiz 3; every quiz's r-studio workspace uses it).
 #
-# Adds: tidyverse, palmerpenguins, and a small local "stat133data" package
-# that bundles the `zev` dataset (the "County" sheet of the ZEV project's
-# New_ZEV_Sales_*.xlsx) so students can load it with a plain `data(zev)` call
-# -- no readxl, file path, or internet access needed during the quiz.
+# Adds: tidyverse and palmerpenguins.
 # 1.1 adds the spatial packages for Quiz 5 (Spatial Data I and II): sf,
 # lwgeom, rnaturalearth, and rnaturalearthdata (offline country maps).
 #
@@ -46,12 +43,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # fail the shell on a per-package dependency error) turn into a hard
 # Docker build failure instead.
 RUN R -e "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/2026-09-30')); \
-  install.packages(c('tidyverse', 'palmerpenguins', 'remotes')); \
+  install.packages(c('tidyverse', 'palmerpenguins')); \
   library(tidyverse); library(palmerpenguins)"
-
-COPY stat133data /tmp/stat133data
-RUN R -e "remotes::install_local('/tmp/stat133data', dependencies = FALSE, upgrade = 'never')" \
-  && rm -rf /tmp/stat133data
 
 # Spatial packages for Quiz 5. sf and lwgeom link against GDAL, GEOS, PROJ,
 # and udunits. They install as precompiled binaries from Posit Package
