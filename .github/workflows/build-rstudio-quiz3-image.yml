@@ -90,7 +90,9 @@ jobs:
           docker run --rm --network none --entrypoint R ${{ env.IMAGE }}:1.1 -e '
             library(tidyverse)
             library(palmerpenguins)
-            data(zev)
+            # data() searches only attached packages, and stat133data is not
+            # attached, so name it (the bare data(zev) failed runs 3 and 4).
+            data(zev, package = "stat133data")
             data(penguins)
             stopifnot(nrow(zev) == 77898, ncol(zev) == 7)
             stopifnot(nrow(penguins) > 0)
