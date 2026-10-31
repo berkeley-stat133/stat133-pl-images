@@ -17,12 +17,18 @@ Custom PrairieLearn RStudio workspace image for Quiz 3, extending
   keep their original spaces, so backtick-quoting (`` `Number of Vehicles` ``)
   still applies.
 
+- **`sf`**, **`lwgeom`**, **`rnaturalearth`**, **`rnaturalearthdata`** (added in
+  `:1.1`, for Quiz 5) -- simple features and geometry operations (lectures 23
+  and 24) and country maps that load without internet access
+  (`ne_countries(country = "norway", returnclass = "sf")`).
+
 Lecture 17 content (themes, scale transforms, `forcats::fct_reorder`) is out
 of scope for Quiz 3, so nothing from that lecture was added.
 
 The built image is consumed by `pl-ucb-stat133`'s `questions/r-studio/info.json`
 (`workspaceOptions.image`), which points at
-`ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.0`.
+`ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.1` (`:1.0` is the
+Quiz 3 and 4 image, without the spatial packages).
 
 ## Build & publish
 
