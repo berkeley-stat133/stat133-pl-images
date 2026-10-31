@@ -67,7 +67,7 @@ jobs:
           push: true
           load: true
           tags: |
-            ${{ env.IMAGE }}:1.0
+            ${{ env.IMAGE }}:1.1
             ${{ env.IMAGE }}:latest
 
       # Runs on the GitHub-hosted runner, not on any contributor's laptop --
@@ -85,9 +85,9 @@ jobs:
       # starts the server instead of running a one-shot command -- the
       # container never exits, and `docker run` hangs until the job times
       # out. Overriding the entrypoint bypasses the server launcher entirely.
-      - name: Smoke test (packages + data(zev) load correctly)
+      - name: Smoke test (packages + data(zev) + offline sf load correctly)
         run: |
-          docker run --rm --entrypoint R ${{ env.IMAGE }}:1.0 -e '
+          docker run --rm --network none --entrypoint R ${{ env.IMAGE }}:1.1 -e '
             library(tidyverse)
             library(palmerpenguins)
             data(zev)
@@ -97,4 +97,12 @@ jobs:
             cat("OK: zev is", nrow(zev), "x", ncol(zev), "\n")
             str(zev)
             str(penguins)
+            library(sf)
+            library(lwgeom)
+            library(rnaturalearth)
+            sq <- st_sfc(st_polygon(list(rbind(c(0, 0), c(1, 0), c(1, 1), c(0, 1), c(0, 0)))), crs = "OGC:CRS84")
+            stopifnot(as.numeric(st_area(sq)) > 0, st_dimension(sq) == 2)
+            norway <- ne_countries(country = "norway", returnclass = "sf")
+            stopifnot(nrow(norway) == 1, inherits(norway, "sf"))
+            print(sf_extSoftVersion())
           '

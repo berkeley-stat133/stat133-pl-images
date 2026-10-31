@@ -1,16 +1,18 @@
-# Custom PrairieLearn RStudio workspace image for Quiz 3.
+# Custom PrairieLearn RStudio workspace image for the Stat 133 quizzes (first
+# built for Quiz 3; every quiz's r-studio workspace uses it).
 #
 # Adds: tidyverse, palmerpenguins, and a small local "stat133data" package
-# that bundles the `ev` dataset (the "County" sheet of the ZEV project's
-# New_ZEV_Sales_*.xlsx) so students can load it with a plain `data(ev)` call
+# that bundles the `zev` dataset (the "County" sheet of the ZEV project's
+# New_ZEV_Sales_*.xlsx) so students can load it with a plain `data(zev)` call
 # -- no readxl, file path, or internet access needed during the quiz.
+# 1.1 adds the spatial packages for Quiz 5 (Spatial Data I and II): sf,
+# lwgeom, rnaturalearth, and rnaturalearthdata (offline country maps).
 #
 # Build (from this directory):
-#   docker build -t ghcr.io/berkeley-stat133/pl-stat133-rstudio-quiz3:1.0 .
-# Push (see README.md for the one-time login/visibility steps):
-#   docker push ghcr.io/berkeley-stat133/pl-stat133-rstudio-quiz3:1.0
-# questions/r-studio/info.json's workspaceOptions.image already points at
-# this tag.
+#   docker build -t ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.1 .
+# The GitHub Actions workflow builds and pushes it (see README.md).
+# pl-ucb-stat133's questions/r-studio/info.json points workspaceOptions.image
+# at the tag in use.
 
 FROM prairielearn/workspace-rstudio
 
@@ -50,5 +52,23 @@ RUN R -e "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/2026-09
 COPY stat133data /tmp/stat133data
 RUN R -e "remotes::install_local('/tmp/stat133data', dependencies = FALSE, upgrade = 'never')" \
   && rm -rf /tmp/stat133data
+
+# Spatial packages for Quiz 5. sf and lwgeom link against GDAL, GEOS, PROJ,
+# and udunits. They install as precompiled binaries from Posit Package
+# Manager for this image's Ubuntu release, at the same snapshot date as the
+# tidyverse above, so the build stays well inside the workflow's timeout.
+# The -dev packages pull in the runtime libraries the binaries need.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      libgdal-dev \
+      libgeos-dev \
+      libproj-dev \
+      libudunits2-dev \
+      libsqlite3-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN codename=$(. /etc/os-release && echo "$VERSION_CODENAME") \
+  && R -e "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/${codename}/2026-09-30')); \
+  install.packages(c('sf', 'lwgeom', 'rnaturalearth', 'rnaturalearthdata')); \
+  library(sf); library(lwgeom); library(rnaturalearth); library(rnaturalearthdata)"
 
 USER 1001
