@@ -4,9 +4,12 @@
 # Adds: tidyverse and palmerpenguins.
 # 1.1 adds the spatial packages for Quiz 5 (Spatial Data I and II): sf,
 # lwgeom, rnaturalearth, and rnaturalearthdata (offline country maps).
+# 1.2 adds the packages for Quiz 6 (R Packages II, Prediction I and II,
+# Classification, APIs I and II): tidymodels, kknn, kernlab, httr2,
+# jsonlite, babynames, devtools, usethis, roxygen2, and testthat.
 #
 # Build (from this directory):
-#   docker build -t ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.1 .
+#   docker build -t ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.2 .
 # The GitHub Actions workflow builds and pushes it (see README.md).
 # pl-ucb-stat133's questions/r-studio/info.json points workspaceOptions.image
 # at the tag in use.
@@ -63,5 +66,22 @@ RUN codename=$(. /etc/os-release && echo "$VERSION_CODENAME") \
   && R -e "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/${codename}/2026-09-30')); \
   install.packages(c('sf', 'lwgeom', 'rnaturalearth', 'rnaturalearthdata')); \
   library(sf); library(lwgeom); library(rnaturalearth); library(rnaturalearthdata)"
+
+# Packages for Quiz 6, as binaries from the same Posit Package Manager
+# snapshot as the spatial packages above. tidymodels and kknn are the
+# modeling lectures' toolkit (kernlab carries PS 6's spam data); httr2 and
+# jsonlite the APIs lectures'; devtools, usethis, roxygen2, and testthat the
+# package-building workflow from R Packages II (babynames is its example
+# data package). libgit2 is the runtime library gert (a devtools dependency)
+# links against.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      libgit2-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN codename=$(. /etc/os-release && echo "$VERSION_CODENAME") \
+  && R -e "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/${codename}/2026-09-30')); \
+  install.packages(c('tidymodels', 'kknn', 'kernlab', 'httr2', 'jsonlite', 'babynames', 'devtools', 'usethis', 'roxygen2', 'testthat')); \
+  library(tidymodels); library(kknn); library(kernlab); library(httr2); library(jsonlite); \
+  library(babynames); library(devtools); library(usethis); library(roxygen2); library(testthat)"
 
 USER 1001

@@ -15,8 +15,9 @@ have collaborator but not admin access).
 
 - [`rstudio-quiz3/`](rstudio-quiz3/) -- the quizzes' custom RStudio workspace
   image, first built for Quiz 3 (`prairielearn/workspace-rstudio` + tidyverse +
-  palmerpenguins, and from `:1.1` sf, lwgeom, rnaturalearth and
-  rnaturalearthdata). Published to
+  palmerpenguins, from `:1.1` sf, lwgeom, rnaturalearth and
+  rnaturalearthdata, and from `:1.2` tidymodels, kknn, kernlab, httr2,
+  jsonlite, babynames, devtools, usethis, roxygen2 and testthat). Published to
   `ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3`.
 
 ## Publishing

@@ -10,13 +10,20 @@ Custom PrairieLearn RStudio workspace image for Quiz 3, extending
   `:1.1`, for Quiz 5) -- simple features and geometry operations (lectures 23
   and 24) and country maps that load without internet access
   (`ne_countries(country = "norway", returnclass = "sf")`).
+- **`tidymodels`**, **`kknn`**, **`kernlab`** (added in `:1.2`, for Quiz 6) --
+  prediction and classification with tidymodels (lectures 31 and 32), and the
+  `spam` data set from PS 6.
+- **`httr2`**, **`jsonlite`** (added in `:1.2`) -- the APIs lectures (33, 34).
+- **`devtools`**, **`usethis`**, **`roxygen2`**, **`testthat`**, **`babynames`**
+  (added in `:1.2`) -- building, documenting, and testing a package (lecture 29).
 
 Lecture 17 content (themes, scale transforms, `forcats::fct_reorder`) is out
 of scope for Quiz 3, so nothing from that lecture was added.
 
 The built image is consumed by `pl-ucb-stat133`'s `questions/r-studio/info.json`
 (`workspaceOptions.image`), which points at
-`ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.1` (`:1.0` is the
+`ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.2` (`:1.1` is the
+Quiz 5 image, without the Quiz 6 packages; `:1.0` is the
 Quiz 3 and 4 image, without the spatial packages; it also bundled a `zev`
 data set in a local `stat133data` package, removed in `:1.1` because no
 question used it).
@@ -34,7 +41,7 @@ After any push, confirm the package is set to **Public** visibility at
 `github.com/orgs/berkeley-stat133/packages` -- PrairieLearn's workspace host
 needs to pull it without credentials.
 
-Bump the tag (e.g. `:1.1`, and update it in `pl-ucb-stat133`'s
+Bump the tag (e.g. `:1.2`, and update it in `pl-ucb-stat133`'s
 `questions/r-studio/info.json`) on any change to the Dockerfile, rather
 than relying solely on one tag, so a bad build can't
 silently replace what's running mid-quiz.
@@ -43,8 +50,8 @@ silently replace what's running mid-quiz.
 
 ```sh
 docker run --rm --network none --entrypoint R \
-  ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.1 \
-  -e 'library(tidyverse); library(palmerpenguins); library(sf); library(rnaturalearth); str(penguins); ne_countries(country = "norway", returnclass = "sf")'
+  ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.2 \
+  -e 'library(tidyverse); library(palmerpenguins); library(sf); library(rnaturalearth); library(tidymodels); library(kknn); library(httr2); library(devtools); str(penguins); ne_countries(country = "norway", returnclass = "sf")'
 ```
 
 The workflow's smoke test runs the same checks with networking off.

@@ -36,6 +36,12 @@ on:
     branches: [main]
     paths:
       - "rstudio-quiz3/**"
+  # On a pull request the image is built and smoke-tested but not pushed,
+  # so a Dockerfile change can be checked before it reaches a quiz.
+  pull_request:
+    paths:
+      - "rstudio-quiz3/**"
+      - ".github/workflows/build-rstudio-quiz3-image.yml"
 
 permissions:
   contents: read
@@ -54,6 +60,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -64,10 +71,10 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: rstudio-quiz3
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           load: true
           tags: |
-            ${{ env.IMAGE }}:1.1
+            ${{ env.IMAGE }}:1.2
             ${{ env.IMAGE }}:latest
 
       # Runs on the GitHub-hosted runner, not on any contributor's laptop --
@@ -85,9 +92,9 @@ jobs:
       # starts the server instead of running a one-shot command -- the
       # container never exits, and `docker run` hangs until the job times
       # out. Overriding the entrypoint bypasses the server launcher entirely.
-      - name: Smoke test (packages and offline sf load correctly)
+      - name: Smoke test (packages, offline sf, and a tidymodels fit load correctly)
         run: |
-          docker run --rm --network none --entrypoint R ${{ env.IMAGE }}:1.1 -e '
+          docker run --rm --network none --entrypoint R ${{ env.IMAGE }}:1.2 -e '
             library(tidyverse)
             library(palmerpenguins)
             data(penguins)
@@ -101,4 +108,27 @@ jobs:
             norway <- ne_countries(country = "norway", returnclass = "sf")
             stopifnot(nrow(norway) == 1, inherits(norway, "sf"))
             print(sf_extSoftVersion())
+            library(tidymodels)
+            library(kknn)
+            set.seed(1)
+            peng <- palmerpenguins::penguins |> drop_na(body_mass_g) |> filter(species != "Chinstrap") |> droplevels()
+            split <- initial_split(peng, prop = 0.7, strata = species)
+            knn_fit <- workflow() |>
+              add_recipe(recipe(species ~ body_mass_g, data = training(split))) |>
+              add_model(nearest_neighbor(neighbors = 5) |> set_mode("classification") |> set_engine("kknn")) |>
+              fit(data = training(split))
+            preds <- testing(split) |> bind_cols(predict(knn_fit, new_data = testing(split)))
+            print(accuracy(preds, truth = species, estimate = .pred_class))
+            library(kernlab)
+            data(spam)
+            stopifnot(nrow(spam) > 0)
+            library(httr2)
+            library(jsonlite)
+            stopifnot(fromJSON("[1, 2, 3]")[3] == 3)
+            library(babynames)
+            stopifnot(nrow(babynames) > 0)
+            library(devtools)
+            library(usethis)
+            library(roxygen2)
+            library(testthat)
           '
