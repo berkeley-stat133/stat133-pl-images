@@ -73,7 +73,10 @@ RUN codename=$(. /etc/os-release && echo "$VERSION_CODENAME") \
 # jsonlite the APIs lectures'; devtools, usethis, roxygen2, and testthat the
 # package-building workflow from R Packages II (babynames is its example
 # data package). libgit2 is the runtime library gert (a devtools dependency)
-# links against, and libglpk the one igraph (a kknn dependency) does.
+# links against, and libglpk the one igraph (a kknn dependency) does. The
+# layer then loads every package it installed, dependencies included, so a
+# binary missing a system library fails the build with that package's name
+# (as igraph did) instead of failing in a student's workspace.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libgit2-dev \
       libglpk-dev \
@@ -81,8 +84,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN codename=$(. /etc/os-release && echo "$VERSION_CODENAME") \
   && R -e "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/${codename}/2026-09-30')); \
-  install.packages(c('tidymodels', 'kknn', 'kernlab', 'httr2', 'jsonlite', 'babynames', 'devtools', 'usethis', 'roxygen2', 'testthat')); \
-  library(tidymodels); library(kknn); library(kernlab); library(httr2); library(jsonlite); \
-  library(babynames); library(devtools); library(usethis); library(roxygen2); library(testthat)"
+  pkgs <- c('tidymodels', 'kknn', 'kernlab', 'httr2', 'jsonlite', 'babynames', 'devtools', 'usethis', 'roxygen2', 'testthat'); \
+  install.packages(pkgs); \
+  deps <- tools::package_dependencies(pkgs, db = installed.packages(), recursive = TRUE); \
+  all <- setdiff(unique(c(pkgs, unlist(deps))), rownames(installed.packages(priority = 'base'))); \
+  bad <- all[!vapply(all, function(p) isTRUE(tryCatch({ loadNamespace(p); TRUE }, error = function(e) { message(p, ': ', conditionMessage(e)); FALSE })), logical(1))]; \
+  if (length(bad)) stop('failed to load: ', paste(bad, collapse = ', ')); \
+  cat('loaded', length(all), 'packages\\n')"
 
 USER 1001
