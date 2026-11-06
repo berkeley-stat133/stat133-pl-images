@@ -73,9 +73,10 @@ RUN codename=$(. /etc/os-release && echo "$VERSION_CODENAME") \
 # jsonlite the APIs lectures'; devtools, usethis, roxygen2, and testthat the
 # package-building workflow from R Packages II (babynames is its example
 # data package). libgit2 is the runtime library gert (a devtools dependency)
-# links against.
+# links against, and libglpk the one igraph (a kknn dependency) does.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libgit2-dev \
+      libglpk-dev \
   && rm -rf /var/lib/apt/lists/*
 
 RUN codename=$(. /etc/os-release && echo "$VERSION_CODENAME") \
