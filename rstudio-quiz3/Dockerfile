@@ -7,9 +7,12 @@
 # 1.2 adds the packages for Quiz 6 (R Packages II, Prediction I and II,
 # Classification, APIs I and II): tidymodels, kknn, kernlab, httr2,
 # jsonlite, babynames, devtools, usethis, roxygen2, and testthat.
+# 1.3 adds plumber (APIs II), so students can plumb() an API file to check
+# its annotations; libsodium is the runtime library its sodium dependency
+# links against.
 #
 # Build (from this directory):
-#   docker build -t ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.2 .
+#   docker build -t ghcr.io/berkeley-stat133/stat133-pl-images-rstudio-quiz3:1.3 .
 # The GitHub Actions workflow builds and pushes it (see README.md).
 # pl-ucb-stat133's questions/r-studio/info.json points workspaceOptions.image
 # at the tag in use.
@@ -80,11 +83,12 @@ RUN codename=$(. /etc/os-release && echo "$VERSION_CODENAME") \
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libgit2-dev \
       libglpk-dev \
+      libsodium-dev \
   && rm -rf /var/lib/apt/lists/*
 
 RUN codename=$(. /etc/os-release && echo "$VERSION_CODENAME") \
   && R -e "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/${codename}/2026-09-30')); \
-  pkgs <- c('tidymodels', 'kknn', 'kernlab', 'httr2', 'jsonlite', 'babynames', 'devtools', 'usethis', 'roxygen2', 'testthat'); \
+  pkgs <- c('tidymodels', 'kknn', 'kernlab', 'httr2', 'jsonlite', 'babynames', 'devtools', 'usethis', 'roxygen2', 'testthat', 'plumber'); \
   install.packages(pkgs); \
   deps <- tools::package_dependencies(pkgs, db = installed.packages(), recursive = TRUE); \
   all <- setdiff(unique(c(pkgs, unlist(deps))), rownames(installed.packages(priority = 'base'))); \
